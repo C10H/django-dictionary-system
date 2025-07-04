@@ -1,0 +1,62 @@
+{% extends 'dictionary/base.html' %}
+
+{% block content %}
+<div class="search-container">
+    <h2>Translate Text</h2>
+    <p>Enter Chinese or English text to get translation:</p>
+    <input type="text" id="searchInput" class="search-input" placeholder="Enter text to translate...">
+    <button onclick="translateText()" class="btn search-btn">Translate</button>
+</div>
+
+<div id="result" class="result" style="display: none;">
+    <h3>Translation Result:</h3>
+    <div id="translationResult"></div>
+    <div id="sourceInfo" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
+</div>
+
+<script>
+async function translateText() {
+    const query = document.getElementById('searchInput').value.trim();
+    const resultDiv = document.getElementById('result');
+    const translationDiv = document.getElementById('translationResult');
+    const sourceDiv = document.getElementById('sourceInfo');
+    
+    if (!query) {
+        alert('Please enter text to translate');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/translate/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query: query })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            translationDiv.innerHTML = `<strong>${data.translation}</strong>`;
+            sourceDiv.innerHTML = `Source: ${data.source === 'database' ? 'Local Dictionary' : 'Baidu Translation'}`;
+            resultDiv.style.display = 'block';
+        } else {
+            translationDiv.innerHTML = `<span style="color: red;">${data.error}</span>`;
+            sourceDiv.innerHTML = '';
+            resultDiv.style.display = 'block';
+        }
+    } catch (error) {
+        translationDiv.innerHTML = '<span style="color: red;">Translation failed. Please try again.</span>';
+        sourceDiv.innerHTML = '';
+        resultDiv.style.display = 'block';
+    }
+}
+
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        translateText();
+    }
+});
+</script>
+{% endblock %}
