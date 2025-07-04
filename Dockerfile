@@ -16,10 +16,13 @@ COPY . /app/
 
 # Create directories
 RUN mkdir -p /app/logs
-RUN mkdir -p /app/static
+RUN mkdir -p /app/staticfiles
 
 # Set up Django settings for production
 ENV DJANGO_SETTINGS_MODULE=dictionary_system.settings
+
+# Configure static files
+ENV STATIC_ROOT=/app/staticfiles
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
